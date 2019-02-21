@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "SKIP_PREFLIGHT_CHECK=true react-scripts build",
     "test": "yarn run lint && yarn run jest",
     "eject": "react-scripts eject",
     "lint": "eslint --ext jsx --ext js -c .eslintrc src",
