@@ -13,20 +13,20 @@ const {
 // config
 const config = {
   port: process.env.PORT || 4000,
-  mailgunEnv: {
-    MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
-    MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN
-  },
-  postgresUrl: (process.env.NODE_ENV === 'development')
-    ? process.env.DATABASE_URL
-    : process.env.DATABASE_URL +'?ssl=true'
+  // mailgunEnv: {
+  //   MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
+  //   MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN
+  // },
+  // postgresUrl: (process.env.NODE_ENV === 'development')
+  //   ? process.env.DATABASE_URL
+  //   : process.env.DATABASE_URL +'?ssl=true'
 };
 
 // Create server with middleware, connect to database
 const app = express();
 app.use(bodyParser.json());
 app.use(enforceHTTPS);
-const pool = createPool(config.postgresUrl);
+// const pool = createPool(config.postgresUrl);
 
 
 // Endpoints for the game
@@ -34,10 +34,10 @@ app.get('/hello', (req, res) => {
   res.set('Content-Type', 'application/json');
   res.json({ status: 'ok' });
 });
-app.get('/games/:code/cards', cardsEndpoint.bind(null, pool));
-app.post('/games/:code/card', addCardEndpoint.bind(null, pool));
-app.post('/cards/:card/rating', addRatingEndpoint.bind(null, pool));
-app.get('/games/:code/groupings', groupingsEndpoint.bind(null, pool));
+// app.get('/games/:code/cards', cardsEndpoint.bind(null, pool));
+// app.post('/games/:code/card', addCardEndpoint.bind(null, pool));
+// app.post('/cards/:card/rating', addRatingEndpoint.bind(null, pool));
+// app.get('/games/:code/groupings', groupingsEndpoint.bind(null, pool));
 
 
 // Serve any static files.

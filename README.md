@@ -5,36 +5,9 @@
 An app for labeling images to train your very own image classifier model in the browser.
 
 ## Development
-This project was adapted from https://github.com/mit-teaching-systems-lab/groupdate
-
-To setup locally:
+To develop locally:
 ```
 $ yarn install
-```
-
-Create database:
-```
-CREATE DATABASE "groupdate";
-\c groupdate;
-CREATE TABLE cards (
-  id serial primary key,
-  code text,
-  text text,
-  session_id text,
-  timestampz timestamptz
-);
-
-CREATE TABLE ratings (
-  id serial primary key,
-  card_id integer,
-  rating integer,
-  session_id text,
-  timestampz timestamptz
-);
-```
-
-### To develop locally:
-```
 $ yarn start
 ```
 
@@ -43,6 +16,8 @@ This will run the server and the create-react-app development server in parallel
 Note that the site is responsive and will include a fake frame for an iPhone 5 running Safari at desktop resolution.
 
 Running `yarn storybook` separately will also start a [storybook](https://github.com/storybooks/storybook) server on port 9001.  You can use this to create "stories" iterate on UI features.
+
+This project was adapted from https://github.com/mit-teaching-systems-lab/groupdate
 
 
 ### To run tests:
