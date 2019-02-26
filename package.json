@@ -21,8 +21,6 @@
     "client/node_modules"
   ],
   "dependencies": {
-    "@tensorflow/tfjs": "^0.15.3",
-    "@tensorflow/tfjs-core": "^0.15.4",
     "body-parser": "^1.18.2",
     "express": "^4.16.1",
     "jest": "^21.2.1",
