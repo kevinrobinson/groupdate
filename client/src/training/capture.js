@@ -1,8 +1,7 @@
-import * as tf from '@tensorflow/tfjs';
 import * as tfc from '@tensorflow/tfjs-core';
 
 export function captureFromImage(imgEl) {
-  return tf.tidy(() => {
+  return tfc.tidy(() => {
     // Reads the image as a Tensor from the <img /> element.
     const rawImage = tfc.fromPixels(imgEl);
 
@@ -15,7 +14,7 @@ export function captureFromImage(imgEl) {
 
     // Normalize the image between -1 and 1. The image comes in between 0-255,
     // so we divide by 127 and subtract 1.
-    return batchedImage.toFloat().div(tf.scalar(127)).sub(tf.scalar(1));
+    return batchedImage.toFloat().div(tfc.scalar(127)).sub(tfc.scalar(1));
   });
 }
 
@@ -24,6 +23,8 @@ export function captureFromImage(imgEl) {
  * @param {Tensor4D} imgTensor An input image Tensor to crop.
  */
 function cropImage(imgTensor) {
+  // const EXPECTED_SIZE = 224;
+  // const size = EXPECTED_SIZE;
   const size = Math.min(imgTensor.shape[0], imgTensor.shape[1]);
   const centerHeight = imgTensor.shape[0] / 2;
   const beginHeight = centerHeight - (size / 2);

@@ -162,28 +162,12 @@ class App extends Component {
 
   renderGroupsFromUrl(props) {
     const {code} = props.match.params;
-    const labels = [{
-      "card": {
-        "id": 101,
-        "src": "/static/media/alexandru-zdrobau-176844-unsplash.22c0c14b.jpg",
-        "text": "alexandru"
-      },
-      "rating": 1
-    }, {
-      "card": {
-        "id": 102,
-        "src": "/static/media/elias-castillo-747678-unsplash.9a3587f3.jpg",
-        "text": "elias"
-      },
-      "rating": 0
-    }, {
-      "card": {
-        "id": 103,
-        "src": "/static/media/iqbal-muakhid-749549-unsplash.a4cf62b6.jpg",
-        "text": "iqbal"
-      },
-      "rating": 1
-    }];
+    const testCards = cards();
+    const labels = [
+      { card: testCards[0], rating: 1 },
+      { card: testCards[1], rating: 0 },
+      { card: testCards[2], rating: 1 }
+    ];
     return this.renderGroups(code, labels);
   }
 
@@ -203,7 +187,7 @@ class App extends Component {
 export default App;
 
 
-const COLORS = 'orange blue red purple black green brown gray'.split(' ');
+const COLORS = 'orange blue red purple green brown gray'.split(' ');
 const NUMBERS = 'one two three four five six seven eight nine ten'.split(' ');
 const LETTERS = 'A B C F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ');
 function sampleModelText() {

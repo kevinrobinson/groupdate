@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 import * as tfc from '@tensorflow/tfjs-core';
+// import {loadFrozenModel} from '@tensorflow/tfjs-converter';
 import {captureFromImage} from './capture';
 
 
@@ -22,33 +23,43 @@ import {captureFromImage} from './capture';
 export default class Trainer {
   constructor(options = {}) {
     this.numClasses = options.numClasses || 2; // binary
-    this.examples = [];
+    this.xs = null;
+    this.yx = null;
+  }
+
+  dispose() {
+    this.xs.dispose();
+    this.ys.dispose();
   }
 
   async init() {
+    console.log('init...');
     this.mobileNetEmbeddings = await loadMobileNetEmbeddings();
 
     // Warmup the model. This isn't necessary, but makes the first prediction
     // faster. Call `dispose` to release the WebGL memory allocated for the return
     // value of `predict`.
     const IMAGE_SIZE = 224;
-    this.mobileNetEmbeddings.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
+    const zeros = tfc.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+    this.mobileNetEmbeddings.predict(zeros).dispose();
   }
 
-  /**
-   * Adds an example to the controller dataset.
-   * @param {img} example image element, raw
-   * @param {number} label The label of the example. Should be a number.
-   */
+  // example here: https://github.com/tensorflow/tfjs-examples/blob/fef45938a6cd6eb7979b530d7882f4965de9dea1/webcam-transfer-learning/controller_dataset.js#L34
   addExample(imgEl, label) {
+    console.log('addExample...');
     tfc.tidy(() => {
       // Grab the x value from the existing net's embeddings
       const imgTensor = captureFromImage(imgEl);
+      // console.log('  imgTensor', imgTensor);
       const x = this.mobileNetEmbeddings.predict(imgTensor);
+      // console.log('  x', x);
 
       // One-hot encode the label.
       const y = tfc.oneHot(tfc.tensor1d([label]).toInt(), this.numClasses);
-      this.examples.push({x, y});
+
+      // keep this memory around for training
+      this.xs = tf.keep(this.xs ? this.xs.concat(x, 0) : x);
+      this.ys = tf.keep(this.ys ? this.ys.concat(y, 0) : y);
     });
   }
 
@@ -76,104 +87,100 @@ export default class Trainer {
    * Sets up and trains the classifier.
    */
   async train() {
-    // const truncatedMobileNet = await loadTruncatedMobileNet();
+    console.log('train...');
+    if (this.xs.length === 0 || this.ys.length === 0) {
+      throw new Error('Add some examples before training!');
+    }
 
-    //   // Warm up the model. This uploads weights to the GPU and compiles the WebGL
-    //   // programs so the first time we collect data from the webcam it will be
-    //   // quick.
-    //   tf.tidy(() => truncatedMobileNet.predict(webcam.capture()));
+    // Creates a 2-layer fully connected model. By creating a separate model,
+    // rather than adding layers to the mobilenet model, we "freeze" the weights
+    // of the mobilenet model, and only train weights from the new model.
+    this.labelitModel = tf.sequential({
+      layers: [
+        // Flattens the input to a vector so we can use it in a dense layer. While
+        // technically a layer, this only performs a reshape (and has no training
+        // parameters).
+        tf.layers.flatten({
+          inputShape: this.mobileNetEmbeddings.outputs[0].shape.slice(1)
+        }),
+        // Layer 1.
+        tf.layers.dense({
+          units: 1000,
+          activation: 'relu',
+          kernelInitializer: 'varianceScaling',
+          useBias: true
+        }),
+        // Layer 2. The number of units of the last layer should correspond
+        // to the number of classes we want to predict.
+        tf.layers.dense({
+          units: this.numClasses,
+          kernelInitializer: 'varianceScaling',
+          useBias: false,
+          activation: 'softmax'
+        })
+      ]
+    });
 
-    //   if (controllerDataset.xs == null) {
-    //     throw new Error('Add some examples before training!');
-    //   }
+    console.log('  labelitModel:', this.labelitModel);
 
-    //   // Creates a 2-layer fully connected model. By creating a separate model,
-    //   // rather than adding layers to the mobilenet model, we "freeze" the weights
-    //   // of the mobilenet model, and only train weights from the new model.
-    //   model = tf.sequential({
-    //     layers: [
-    //       // Flattens the input to a vector so we can use it in a dense layer. While
-    //       // technically a layer, this only performs a reshape (and has no training
-    //       // parameters).
-    //       tf.layers.flatten({
-    //         inputShape: truncatedMobileNet.outputs[0].shape.slice(1)
-    //       }),
-    //       // Layer 1.
-    //       tf.layers.dense({
-    //         units: ui.getDenseUnits(),
-    //         activation: 'relu',
-    //         kernelInitializer: 'varianceScaling',
-    //         useBias: true
-    //       }),
-    //       // Layer 2. The number of units of the last layer should correspond
-    //       // to the number of classes we want to predict.
-    //       tf.layers.dense({
-    //         units: NUM_CLASSES,
-    //         kernelInitializer: 'varianceScaling',
-    //         useBias: false,
-    //         activation: 'softmax'
-    //       })
-    //     ]
-    //   });
+    // Creates the optimizers which drives training of the model.
+    const LEARNING_RATE = 0.00001;
+    const optimizer = tf.train.adam(LEARNING_RATE);
+    
+    // We use categoricalCrossentropy which is the loss function we use for
+    // categorical classification which measures the error between our predicted
+    // probability distribution over classes (probability that an input is of each
+    // class), versus the label (100% probability in the true class)>
+    this.labelitModel.compile({optimizer: optimizer, loss: 'categoricalCrossentropy'});
 
-    //   // Creates the optimizers which drives training of the model.
-    //   const optimizer = tf.train.adam(ui.getLearningRate());
-    //   // We use categoricalCrossentropy which is the loss function we use for
-    //   // categorical classification which measures the error between our predicted
-    //   // probability distribution over classes (probability that an input is of each
-    //   // class), versus the label (100% probability in the true class)>
-    //   model.compile({optimizer: optimizer, loss: 'categoricalCrossentropy'});
+    // We parameterize batch size as a fraction of the entire dataset because the
+    // number of examples that are collected depends on how many examples the user
+    // collects. This allows us to have a flexible batch size.
+    const BATCH_SIZE_FRACTION = 0.4;
+    const batchSize = Math.floor(this.xs.shape[0] * BATCH_SIZE_FRACTION);
+    if (!(batchSize > 0)) {
+      throw new Error(`Batch size is 0 or NaN. Please choose a non-zero fraction.`);
+    }
 
-    //   // We parameterize batch size as a fraction of the entire dataset because the
-    //   // number of examples that are collected depends on how many examples the user
-    //   // collects. This allows us to have a flexible batch size.
-    //   const batchSize =
-    //       Math.floor(controllerDataset.xs.shape[0] * ui.getBatchSizeFraction());
-    //   if (!(batchSize > 0)) {
-    //     throw new Error(
-    //         `Batch size is 0 or NaN. Please choose a non-zero fraction.`);
-    //   }
+    // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
+    console.log('  fit...');
+    const EPOCHS = 5;
+    return this.labelitModel.fit(this.xs, this.ys, {
+      batchSize,
+      epochs: EPOCHS,
+      callbacks: {
+        onEpochBegin(epoch) { console.log('onEpochBegin, epoch:', epoch); },
+        onBatchEnd(batch, logs) { console.log('  loss: ' + logs.loss.toFixed(5)); }
+      }
+    });
+  }
 
-    //   // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
-    //   model.fit(controllerDataset.xs, controllerDataset.ys, {
-    //     batchSize,
-    //     epochs: ui.getEpochs(),
-    //     callbacks: {
-    //       onBatchEnd: async (batch, logs) => {
-    //         ui.trainStatus('Loss: ' + logs.loss.toFixed(5));
-    //       }
-    //     }
-    //   });
+  async predict(imgEl) {
+    console.log('predict...');
+    const predictedClass = tf.tidy(() => {
+      const imgTensor = captureFromImage(imgEl);
+
+      // Make a prediction through mobilenet, getting the internal activation of
+      // the mobilenet model, i.e., "embeddings" of the input images.
+      const embeddings = this.mobileNetEmbeddings.predict(imgTensor);
+
+      // Make a prediction through our newly-trained model using the embeddings
+      // from mobilenet as input.
+      const predictions = this.labelitModel.predict(embeddings);
+
+      // Returns the index with the maximum probability. This number corresponds
+      // to the class the model thinks is the most probable given the input.
+      return predictions.as1D().argMax();
+    });
+    const classId = (await predictedClass.data())[0];
+    predictedClass.dispose();
+    return classId;
   }
 }
 
-// function predict() {
-//   while (isPredicting) {
-//     const predictedClass = tf.tidy(() => {
-//       // Capture the frame from the webcam.
-//       const img = webcam.capture();
 
-//       // Make a prediction through mobilenet, getting the internal activation of
-//       // the mobilenet model, i.e., "embeddings" of the input images.
-//       const embeddings = truncatedMobileNet.predict(img);
 
-//       // Make a prediction through our newly-trained model using the embeddings
-//       // from mobilenet as input.
-//       const predictions = model.predict(embeddings);
 
-//       // Returns the index with the maximum probability. This number corresponds
-//       // to the class the model thinks is the most probable given the input.
-//       return predictions.as1D().argMax();
-//     });
-
-//     const classId = (await predictedClass.data())[0];
-//     predictedClass.dispose();
-
-//     ui.predictClass(classId);
-//     await tf.nextFrame();
-//   }
-//   ui.donePredicting();
-// }
 
 
 

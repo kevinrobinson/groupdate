@@ -11,8 +11,9 @@
     "react-scripts": "2.1.5"
   },
   "dependencies": {
-    "@tensorflow/tfjs-converter": "^0.8.3",
-    "@tensorflow/tfjs-core": "^0.15.3",
+    "@tensorflow/tfjs": "^0.15",
+    "@tensorflow/tfjs-converter": "^0.8.4",
+    "@tensorflow/tfjs-core": "^0.15",
     "animated": "^0.2.0",
     "prop-types": "^15.6.0",
     "query-string": "^5.0.0",

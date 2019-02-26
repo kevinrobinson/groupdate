@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Trainer from './training/Trainer';
-
+import raincoatDog from './img/charles-716555-unsplash-resized.jpg';
 
 class Training extends Component {
   constructor(props) {
@@ -26,6 +26,7 @@ class Training extends Component {
     const {labels} = this.props;
     await this.trainer.init();
 
+    console.log('adding examples..');
     labels.forEach(label => {
       const {card, rating} = label;
       const imgEl = this.imgEls[card.id];
@@ -33,6 +34,17 @@ class Training extends Component {
       
       this.trainer.addExample(imgEl, rating);
     });
+    console.log('examples added!');
+
+    console.log('training...');
+    const history = await this.trainer.train();
+    console.log('trained!');
+    console.log('history', history);
+
+    console.log('predicting...');
+    const prediction = await this.trainer.predict(this.raincoatImgEl);
+    console.log('prediction', prediction);
+
   }
 
   render() {
@@ -49,13 +61,22 @@ class Training extends Component {
               <img
                 ref={el => this.imgEls[card.id] = el}
                 src={card.src}
-                width="100%"
-                height="auto"
+                width={300}
+                height={224}
+                // width="100%"
+                // height="auto"
                 alt={card.text} />
               <div style={{background: '#333', color: 'white', padding: 10}}>{rating === 1 ? 'yes' : 'no'}</div>
             </div>
           );
         })}
+        <img
+          ref={el => this.raincoatImgEl = el}
+          width={300}
+          height={224}
+          alt="raincoat dog"
+          src={raincoatDog}
+        />
       </div>
     );
   }
