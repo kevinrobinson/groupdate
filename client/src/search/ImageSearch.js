@@ -10,7 +10,8 @@ export default class ImageSearch extends Component {
     this.state = {
       error: null,
       json: null,
-      predictionsMap: {}
+      predictionsMap: {},
+      imagesLoadedMap: {}
     };
 
     this.imgEls = {};
@@ -24,10 +25,6 @@ export default class ImageSearch extends Component {
     this.debouncedFetch();
   }
 
-  componentWillUnmount(){
-    this.imgEls = undefined;
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.props.query !== prevProps.query) {
       this.debouncedFetch();
@@ -36,6 +33,10 @@ export default class ImageSearch extends Component {
     if (!_.isEqual(this.state.json, prevState.json)) {
       this.updatePredictions();
     }
+  }
+
+  componentWillUnmount(){
+    this.imgEls = undefined;
   }
 
   apiKey() {
@@ -49,10 +50,13 @@ export default class ImageSearch extends Component {
       return;
     }
 
+    console.log('imagesLoadedMap', JSON.stringify(imagesLoadedMap, null, 2));
+    const {imagesLoadedMap} = this.state;
     const items = (this.state.json && this.state.json.items) || [];
     const predictions = await Promise.all(items.map(item => {
       const imgEl = this.imgEls[item.link];
-      return asyncPredictFn(imgEl);
+      const isImageLoaded = imagesLoadedMap[item.link];
+      return (isImageLoaded) ? asyncPredictFn(imgEl) : -1;
     }));
     var predictionsMap = {};
     items.forEach((item, index) => predictionsMap[item.link] = predictions[index]);
@@ -78,6 +82,16 @@ export default class ImageSearch extends Component {
     this.setState({error});
   }
 
+  onImageLoaded(link) {
+    const {imagesLoadedMap} = this.state;
+    console.log('onImageLoaded', link, imagesLoadedMap);
+    this.setState({
+      imagesLoadedMap: {
+        ...imagesLoadedMap,
+        [link]: true
+      }
+    });
+  }
   render() {
     return (
       <div className="ImageSearch">
@@ -115,8 +129,10 @@ export default class ImageSearch extends Component {
         {items.map(item => (
           <div className="ImageSearch-image" key={item.link}>
             <img
+              crossOrigin="Anonymous"
               ref={el => this.imgEls[item.link] = el}
-              src={item.image.thumbnailLink}
+              onLoad={this.onImageLoaded.bind(this, item.link)}
+              src={item.image.thumbnailLink} /* can't load full images, they don't all support CORS */
               alt={item.title}
               {...imageProps}
             />
@@ -151,3 +167,13 @@ export function readApiKeyFromWindow() {
 function readDomainFromEnv() {
   return window.process.env.REACT_APP_DOMAIN || 'http://localhost:5000';
 }
+
+// doesn't work, "Tainted canvases may not be loaded."
+// see https://mdn.beonex.com/en/CORS_Enabled_Image.html
+// even with CORS header from server, need to use crossOrigin on image el
+// function copyImgElToCanvasEl(imgEl) {
+//   const canvas = document.createElement('canvas');
+//   const context = canvas.getContext('2d');
+//   context.drawImage(imgEl, imgEl.width, imgEl.height);
+//   return canvas;
+// }

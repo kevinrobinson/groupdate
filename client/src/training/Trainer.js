@@ -124,7 +124,7 @@ export default class Trainer {
       ]
     });
 
-    console.log('  labelitModel:', this.labelitModel);
+    // console.log('  labelitModel:', this.labelitModel);
 
     // Creates the optimizers which drives training of the model.
     const LEARNING_RATE = 0.00001;

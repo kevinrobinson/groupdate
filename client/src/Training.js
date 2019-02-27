@@ -78,6 +78,7 @@ class Training extends Component {
           return (
             <div key={card.id}>
               <img
+                crossOrigin="Anonymous"
                 ref={el => this.imgEls[card.id] = el}
                 src={card.src}
                 width={300}
@@ -103,7 +104,7 @@ class Training extends Component {
     return (
       <div>
         <div>training:</div>
-        {isTraining ? 'working...' : <button onClick={this.onTrain}>train!</button>}
+        {isTraining ? 'doing gradient descent...' : <button onClick={this.onTrain}>train!</button>}
       </div>
     );
   }
@@ -114,6 +115,7 @@ class Training extends Component {
       <div>
         <div>predictions:</div>
         <img
+          crossOrigin="Anonymous"
           ref={el => this.raincoatImgEl = el}
           width={300}
           height={224}
