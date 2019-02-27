@@ -11,7 +11,7 @@ Labeling
 ![flow-splash](docs/flow-splash.png)
 ![flow-new-model](docs/flow-new-model.png)
 ![flow-swipe](docs/flow-swipe.png)
-![flow-swiping](docs/flow-swiping.png)
+![flow-swiping](docs/flow-swiping.jpg)
 
 Training
 ![flow-train](docs/flow-train.png)
