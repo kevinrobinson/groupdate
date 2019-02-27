@@ -18,6 +18,7 @@ export default class ImageSearch extends Component {
     this.onFetchDone = this.onFetchDone.bind(this);
     this.onFetchError = this.onFetchError.bind(this);
     this.debouncedFetch = _.debounce(this.debouncedFetch, 100);
+    this.debouncedUpdatePredictions = _.debounce(this.debouncedUpdatePredictions, 100);
   }
 
   componentDidMount() {
@@ -36,7 +37,7 @@ export default class ImageSearch extends Component {
       !_.isEqual(this.state.imagesLoadedMap, prevState.imagesLoadedMap)
     );
     if (dataHasChanged) {
-      this.updatePredictions();
+      this.debouncedUpdatePredictions();
     }
   }
 
@@ -48,7 +49,7 @@ export default class ImageSearch extends Component {
     return this.props.apiKey || readApiKeyFromWindow();
   }
 
-  async updatePredictions() {
+  async debouncedUpdatePredictions() {
     const {asyncPredictFn} = this.props;
     if (!asyncPredictFn) {
       console.log('no asyncPredictFn...');
@@ -146,7 +147,7 @@ export default class ImageSearch extends Component {
             </div>
             <div>
               <span>prediction: </span>
-              <div>{this.renderPredictionFor(item)}</div>
+              <span>{this.renderPredictionFor(item)}</span>
             </div>
           </div>
         ))}

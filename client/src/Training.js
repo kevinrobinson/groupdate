@@ -105,6 +105,7 @@ class Training extends Component {
       <div>
         <div>training:</div>
         {isTraining ? 'feeding the model examples and labels, adjusting the model to reduce the error, and repeating...' : <button onClick={this.onTrain}>train!</button>}
+        <br />
       </div>
     );
   }
