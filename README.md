@@ -2,7 +2,7 @@
 
 <a href="https://label-it.herokuapp.com/?github"><img src="docs/try.jpg" width="124" height="53" alt="Try it!"/></a>
 
-An app for labeling images to train your very own image classifier model in the browser.
+An app for labeling images to train your very own image classifier model in the browser.  It uses https://github.com/kevinrobinson/services-edu/ to let you test out on different image searches.
 
 ## Demo
 https://label-it.herokuapp.com/
