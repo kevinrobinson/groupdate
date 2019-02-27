@@ -11,11 +11,12 @@ https://label-it.herokuapp.com/
 <img src="docs/flow-splash.jpg" alt="flow-splash" width="20%" height="auto" /><img src="docs/flow-new-model.jpg" alt="flow-new-model" width="20%" height="auto" /><img src="docs/flow-swipe.jpg" alt="flow-swipe" width="20%" height="auto" /><img src="docs/flow-swiping.jpg" alt="flow-swiping" width="20%" height="auto" />
 
 #### Training
-![flow-train](docs/flow-train.jpg) ![flow-training](docs/flow-training.jpg) ![flow-waiting](docs/flow-waiting.jpg)
+<img src="docs/flow-train.jpg" alt="flow-train" width="20%" height="auto" /><img src="docs/flow-training.jpg" alt="flow-training" width="20%" height="auto" /><img src="docs/flow-waiting.jpg" alt="flow-waiting" width="20%" height="auto" />
 
 #### Trying it out!
-![try-cats-1](docs/try-cats-1.jpg) ![try-cats-2](docs/try-cats-2.jpg) ![superdog-0](docs/superdog-0.jpg) ![superdog-1](docs/superdog-1.jpg)
-![dog-0](docs/dog-0.jpg) ![dog-1](docs/dog-1.jpg) ![ugly-1](docs/ugly-1.jpg)
+<img src="docs/try-cats-1.jpg" alt="try-cats-1" width="20%" height="auto" /><img src="docs/try-cats-2.jpg" alt="try-cats-2" width="20%" height="auto" /><img src="docs/superdog-0.jpg" alt="superdog-0" width="20%" height="auto" /><img src="docs/superdog-1.jpg" alt="superdog-1" width="20%" height="auto" />
+
+<img src="docs/dog-0.jpg" alt="dog-0" width="20%" height="auto" /><img src="docs/dog-1.jpg" alt="dog-1" width="20%" height="auto" /><img src="docs/ugly-1.jpg" alt="ugly-1" width="20%" height="auto" />
 
 
 ## Development
