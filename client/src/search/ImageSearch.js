@@ -30,7 +30,12 @@ export default class ImageSearch extends Component {
       this.debouncedFetch();
     }
 
-    if (!_.isEqual(this.state.json, prevState.json)) {
+    const dataHasChanged = (
+      !_.isEqual(this.state.json, prevState.json) ||
+      !_.isEqual(this.state.predictionsMap, prevState.predictionsMap) ||
+      !_.isEqual(this.state.imagesLoadedMap, prevState.imagesLoadedMap)
+    );
+    if (dataHasChanged) {
       this.updatePredictions();
     }
   }
@@ -50,17 +55,17 @@ export default class ImageSearch extends Component {
       return;
     }
 
-    console.log('imagesLoadedMap', JSON.stringify(imagesLoadedMap, null, 2));
+    // console.log('imagesLoadedMap', JSON.stringify(imagesLoadedMap, null, 2));
     const {imagesLoadedMap} = this.state;
     const items = (this.state.json && this.state.json.items) || [];
     const predictions = await Promise.all(items.map(item => {
       const imgEl = this.imgEls[item.link];
       const isImageLoaded = imagesLoadedMap[item.link];
-      return (isImageLoaded) ? asyncPredictFn(imgEl) : -1;
+      return (isImageLoaded) ? asyncPredictFn(imgEl) : null;
     }));
     var predictionsMap = {};
     items.forEach((item, index) => predictionsMap[item.link] = predictions[index]);
-    console.log('predictionsMap', JSON.stringify(predictionsMap, null, 2));
+    // console.log('predictionsMap', JSON.stringify(predictionsMap, null, 2));
     this.setState({predictionsMap});
   }
 
@@ -123,7 +128,6 @@ export default class ImageSearch extends Component {
 
   renderJson(items) {
     const {imageProps} = this.props;
-    const {predictionsMap} = this.state;
     return (
       <div>
         {items.map(item => (
@@ -142,12 +146,18 @@ export default class ImageSearch extends Component {
             </div>
             <div>
               <span>prediction: </span>
-              {(predictionsMap || {})[item.link]}
+              <div>{this.renderPredictionFor(item)}</div>
             </div>
           </div>
         ))}
       </div>
     );
+  }
+
+  renderPredictionFor(item) {
+    const {predictionsMap} = this.state;
+    const predictionValue = (predictionsMap || {})[item.link];
+    return (predictionValue === null) ? '...' : predictionValue;
   }
 }
 ImageSearch.propTypes = {

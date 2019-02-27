@@ -104,7 +104,7 @@ class Training extends Component {
     return (
       <div>
         <div>training:</div>
-        {isTraining ? 'doing gradient descent...' : <button onClick={this.onTrain}>train!</button>}
+        {isTraining ? 'feeding the model examples and labels, adjusting the model to reduce the error, and repeating...' : <button onClick={this.onTrain}>train!</button>}
       </div>
     );
   }
