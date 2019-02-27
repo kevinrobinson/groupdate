@@ -2,14 +2,23 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Trainer from './training/Trainer';
 import raincoatDog from './img/charles-716555-unsplash-resized.jpg';
+import ImageSearch from './search/ImageSearch';
+
 
 class Training extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      isTraining: false,
+      isReadyToPredict: false,
+      query: 'dogs'
+    };
     this.imgEls = {};
     this.trainer = new Trainer();
+
     this.onTrain = this.onTrain.bind(this);
+    this.onQueryChange = this.onQueryChange.bind(this);
   }
 
   componentWillUnmount(){
@@ -23,6 +32,8 @@ class Training extends Component {
   // }
   
   async onTrain() {
+    this.setState({isTraining: true});
+
     const {labels} = this.props;
     await this.trainer.init();
 
@@ -41,19 +52,27 @@ class Training extends Component {
     console.log('trained!');
     console.log('history', history);
 
-    console.log('predicting...');
-    const prediction = await this.trainer.predict(this.raincoatImgEl);
-    console.log('prediction', prediction);
+    // console.log('predicting...');
+    // const prediction = await this.trainer.predict(this.raincoatImgEl);
+    // console.log('prediction for raincoatImgEl:', prediction);
 
+    this.setState({isReadyToPredict: true, isTraining: false});
+  }
+
+  onQueryChange(e) {
+    const query = e.target.value;
+    this.setState({query});
   }
 
   render() {
     const {modelEl, labels} = this.props;
-
+    const {isReadyToPredict} = this.state;
     return (
       <div className="Training">
+        <div>model:</div>
         <div>{modelEl}</div>
-        <button onClick={this.onTrain}>train</button>
+        <br />
+        <div>labels:</div>
         {labels.map(label => {
           const {card, rating} = label;
           return (
@@ -70,12 +89,53 @@ class Training extends Component {
             </div>
           );
         })}
+        <br />
+        
+        {!isReadyToPredict
+          ? this.renderTraining()
+          : this.renderPredictions()}
+      </div>
+    );
+  }
+
+  renderTraining() {
+    const {isTraining} = this.state;
+    return (
+      <div>
+        <div>training:</div>
+        {isTraining ? 'working...' : <button onClick={this.onTrain}>train!</button>}
+      </div>
+    );
+  }
+
+  renderPredictions() {
+    const {query} = this.state;
+    return (
+      <div>
+        <div>predictions:</div>
         <img
           ref={el => this.raincoatImgEl = el}
           width={300}
           height={224}
           alt="raincoat dog"
           src={raincoatDog}
+        />
+        <div>Try your model out with more images!</div>
+        <input
+          autoFocus={true}
+          onChange={this.onQueryChange}
+          type="text"
+          value={query}
+        />
+        <ImageSearch
+          apiKey="abc"
+          domain="https://services-edu.herokuapp.com"
+          query={query}
+          imageProps={{
+            width: 300,
+            height: 224
+          }}
+          asyncPredictFn={async (imgEl) => this.trainer.predict(imgEl)}
         />
       </div>
     );

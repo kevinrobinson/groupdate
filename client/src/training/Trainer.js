@@ -23,6 +23,9 @@ import {captureFromImage} from './capture';
 export default class Trainer {
   constructor(options = {}) {
     this.numClasses = options.numClasses || 2; // binary
+    this.batchSizeFraction = options.batchSizeFraction || 0.4;
+    this.epochs = options.epochs || 3;
+
     this.xs = null;
     this.yx = null;
   }
@@ -136,18 +139,16 @@ export default class Trainer {
     // We parameterize batch size as a fraction of the entire dataset because the
     // number of examples that are collected depends on how many examples the user
     // collects. This allows us to have a flexible batch size.
-    const BATCH_SIZE_FRACTION = 0.4;
-    const batchSize = Math.floor(this.xs.shape[0] * BATCH_SIZE_FRACTION);
+    const batchSize = Math.floor(this.xs.shape[0] * this.batchSizeFraction);
     if (!(batchSize > 0)) {
       throw new Error(`Batch size is 0 or NaN. Please choose a non-zero fraction.`);
     }
 
     // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
     console.log('  fit...');
-    const EPOCHS = 5;
     return this.labelitModel.fit(this.xs, this.ys, {
       batchSize,
-      epochs: EPOCHS,
+      epochs: this.epochs,
       callbacks: {
         onEpochBegin(epoch) { console.log('onEpochBegin, epoch:', epoch); },
         onBatchEnd(batch, logs) { console.log('  loss: ' + logs.loss.toFixed(5)); }

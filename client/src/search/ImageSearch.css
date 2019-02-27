@@ -1,0 +1,20 @@
+.ImageSearch {
+  text-align: center;
+}
+
+.ImageSearch-header {
+}
+
+.ImageSearch-image {
+  display: block;
+  margin-bottom: 40px;
+}
+
+.ImageSearch-image-source {
+  font-size: 12px;
+  color: white;
+}
+
+.ImageSearch-image-link {
+  color: gray;
+}
