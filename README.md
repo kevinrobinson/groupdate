@@ -8,10 +8,10 @@ An app for labeling images to train your very own image classifier model in the 
 https://label-it.herokuapp.com/
 
 #### Labeling
-<a href="docs/flow-splash.jpg" alt="flow-splash" width="20%" height="auto" />
-<a href="docs/flow-new-model.jpg" alt="flow-new-model" width="20%" height="auto" />
-<a href="docs/flow-swipe.jpg" alt="flow-swipe" width="20%" height="auto" />
-<a href="docs/flow-swiping.jpg" alt="flow-swiping" width="20%" height="auto" />
+<img href="docs/flow-splash.jpg" alt="flow-splash" width="20%" height="auto" />
+<img href="docs/flow-new-model.jpg" alt="flow-new-model" width="20%" height="auto" />
+<img href="docs/flow-swipe.jpg" alt="flow-swipe" width="20%" height="auto" />
+<img href="docs/flow-swiping.jpg" alt="flow-swiping" width="20%" height="auto" />
 
 #### Training
 ![flow-train](docs/flow-train.jpg) ![flow-training](docs/flow-training.jpg) ![flow-waiting](docs/flow-waiting.jpg)
