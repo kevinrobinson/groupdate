@@ -83,8 +83,6 @@ class Training extends Component {
                 src={card.src}
                 width={300}
                 height={224}
-                // width="100%"
-                // height="auto"
                 alt={card.text} />
               <div style={{background: '#333', color: 'white', padding: 10}}>{rating === 1 ? 'yes' : 'no'}</div>
             </div>

@@ -48,7 +48,15 @@ class Join extends Component {
         <form className="Global-content" action="#" onSubmit={this.onSubmit}>
           <div className="Global-title">{`Here's a new model for you to train:`}</div>
           <div className="Join-model-text">{modelEl}</div>
-          <div className="Global-title">{`What's your group code?`}</div>
+          <div className="Join-details">
+            <div className="Global-title">{`It's built from:`}</div>
+            <ul>
+              <li><b>embeddings</b> from a copy of the <a href="https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/README.md">MobileNet</a> model, created by Google</li>
+              <li><b>dataset</b> from <a href="http://www.image-net.org/">ImageNet</a> used to train those embeddings</li>
+              <li><b>training architecture</b> made for <a href="https://github.com/kevinrobinson/labelit">this project</a> so you can train your own model!</li>
+            </ul>
+          </div>
+          {/*<div className="Global-title">{`What's your group code?`}</div>
           <input
             ref={(el) => { this.inputEl = el; }} 
             className="Join-input"
@@ -56,10 +64,10 @@ class Join extends Component {
             placeholder="otter"
             value={code}
             onChange={this.onCodeChange} />
-          <input type="button" value="Next" style={{display: 'none'}} />
+          <input type="button" value="Next" style={{display: 'none'}} />*/}
           <TappableButton
             style={{marginBottom: 20}}
-            disabled={code.length === 0}
+            // disabled={code.length === 0}
             onClick={this.onStart}>Next</TappableButton>
         </form>
       </div>

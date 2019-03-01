@@ -43,17 +43,27 @@ class Swiping extends Component {
     
     return (
       <div className="Swiping">
-        <div className="Global-content">
-          <div className="Global-title">Swipe right to teach {modelEl} that the animal is cute, left if not.</div>
+        <div style={{padding: 10}}>
+          <div style={{fontSize: 20, fontWeight: 'bold'}}>
+            <div>Swipe right to teach {modelEl} that the animal is cute,</div>
+            <div>left if not.</div>
+          </div>
           <p className="Swiping-left">{remainingCount} more</p>
+        </div>
+        <div>
           <Swipeable
             key={id}
-            height={150}
+            height={224}
             onSwipeRight={this.onSwipe.bind(this, card, 1)}
             onSwipeLeft={this.onSwipe.bind(this, card, 0)}
           >
-            <div className="Swiping-card" style={{overflow: 'hidden'}}>
-              <img src={src} alt={text} height="auto" width="100%" />
+            <div className="Swiping-card">
+              <img
+                src={src}
+                alt={text}
+                width="100%"
+                height="auto"
+              />
             </div>
           </Swipeable>
         </div>
