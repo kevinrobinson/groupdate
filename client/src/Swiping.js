@@ -45,8 +45,7 @@ class Swiping extends Component {
       <div className="Swiping">
         <div style={{padding: 10}}>
           <div style={{fontSize: 20, fontWeight: 'bold'}}>
-            <div>Swipe right to teach {modelEl} that the animal is cute,</div>
-            <div>left if not.</div>
+            <div>Swipe right to teach {modelEl} that the animal is cute, left if not.</div>
           </div>
           <p className="Swiping-left">{remainingCount} more</p>
         </div>

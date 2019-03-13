@@ -4,8 +4,6 @@ import uuid from 'uuid';
 import _ from 'lodash';
 import MobileSimulator from './components/MobileSimulator.js';
 import Join from './Join';
-// import Words from './Words';
-import Wait from './Wait';
 import Swiping from './Swiping';
 import Training from './Training';
 // import Predict from './Predict';
@@ -35,7 +33,6 @@ class App extends Component {
     this.doStoreLabel = this.doStoreLabel.bind(this);
     this.onDoneSplash = this.onDoneSplash.bind(this);
     this.onDoneJoin = this.onDoneJoin.bind(this);
-    this.onDoneWait = this.onDoneWait.bind(this);
     this.onAddMore = this.onAddMore.bind(this);
     this.onDoneSwiping = this.onDoneSwiping.bind(this);
     this.onPostCardDone = this.onPostCardDone.bind(this);
@@ -74,16 +71,16 @@ class App extends Component {
   //   this.setState({ screenKey: 'wait' });
   // }
 
-  onDoneWait(cards) {
-    this.setState({cards, screenKey: 'groupings' });
-  }
+  // onDoneWait(cards) {
+  //   this.setState({cards, screenKey: 'groupings' });
+  // }
 
   onAddMore() {
     this.setState({ screenKey: 'swiping' });
   }
 
   onDoneSwiping() {
-    this.setState({ screenKey: 'wait' });
+    this.setState({ screenKey: 'groupings' });
   }
 
   render() {
@@ -144,15 +141,6 @@ class App extends Component {
       );
     }
 
-    if (screenKey === 'wait') {
-      return (
-        <Wait
-          code={code}
-          onNext={this.onDoneWait}
-          onAddMore={this.onAddMore} />
-      );
-    }
-
     if (screenKey === 'groupings') {
       return this.renderGroups(code, labels);
     }
@@ -175,6 +163,7 @@ class App extends Component {
     const {groupCount, modelText} = this.state;
     return (
       <Training
+        modelText={modelText}
         modelEl={renderModelEl(modelText)}
         labels={labels}
         code={code}
@@ -186,19 +175,19 @@ class App extends Component {
 
 export default App;
 
-
-const COLORS = 'orange blue red purple green brown gray'.split(' ');
-const NUMBERS = 'one two three four five six seven eight nine ten'.split(' ');
-const LETTERS = 'A B C F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ');
+const COLORS = 'orange blue red purple green brown'.split(' ');
+const EMOTIONS = 'shocked inspired determined foolish amazed envious happy excited jubilant sassy nervous silly hopeful eager foolish'.split(' ');
+const ANIMALS = 'beaver wombat crow ferret platypus walrus dinosaur gopher otter kraken grizzly penguin panda hedgehog lemur leopard'.split(' ');
+// const NUMBERS = 'one two three four five six seven eight nine ten'.split(' ');
+// const LETTERS = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ');
 function sampleModelText() {
-  const letter = _.sample(LETTERS);
   return [
     _.sample(COLORS),
-    _.sample(NUMBERS),
-    letter + letter
+    _.sample(EMOTIONS),
+    _.sample(ANIMALS)
   ].join('-');
 }
 
 function renderModelEl(modelText) {
-  return <div style={{color: modelText.split('-')[0]}}>{modelText}</div>;
+  return <span style={{color: modelText.split('-')[0]}}>{modelText}</span>;
 }

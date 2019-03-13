@@ -1,24 +1,27 @@
-import React, { Component } from 'react';
+import React, { useRef, useState, useEffect, Component } from 'react';
 import PropTypes from 'prop-types';
 import Trainer from './training/Trainer';
-import raincoatDog from './img/charles-716555-unsplash-resized.jpg';
-import ImageSearch from './search/ImageSearch';
+import TappableButton from './components/TappableButton';
+import YourOwnSearch from './YourOwnSearch';
+import waitingGif from './waiting.gif';
+import doneGif from './troy_happy.gif';
+import './Training.css';
 
-
-class Training extends Component {
+export default class Training extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       isTraining: false,
       isReadyToPredict: false,
-      query: 'dogs'
+      predictions: []
     };
     this.imgEls = {};
     this.trainer = new Trainer();
 
     this.onTrain = this.onTrain.bind(this);
-    this.onQueryChange = this.onQueryChange.bind(this);
+    this.onPredictionMade = this.onPredictionMade.bind(this);
+    this.onShare = this.onShare.bind(this);
   }
 
   componentWillUnmount(){
@@ -26,11 +29,6 @@ class Training extends Component {
     this.trainer = undefined;
   }
 
-  // prefetchImages() {
-  //   const {labels} = this.props;
-  //   labels.forEach(label => new Image().src = label.card.src);
-  // }
-  
   async onTrain() {
     this.setState({isTraining: true});
 
@@ -52,27 +50,41 @@ class Training extends Component {
     console.log('trained!');
     console.log('history', history);
 
-    // console.log('predicting...');
-    // const prediction = await this.trainer.predict(this.raincoatImgEl);
-    // console.log('prediction for raincoatImgEl:', prediction);
-
     this.setState({isReadyToPredict: true, isTraining: false});
   }
 
-  onQueryChange(e) {
-    const query = e.target.value;
-    this.setState({query});
+  onPredictionMade(payload) {
+    const predictions = this.state.predictions.concat(payload);
+    this.setState({predictions});
+  }
+
+  onShare() {
+    const {modelText} = this.props;
+    const {predictions} = this.state;
+    console.log('share', JSON.stringify({modelText, predictions}));
   }
 
   render() {
-    const {modelEl, labels} = this.props;
-    const {isReadyToPredict} = this.state;
     return (
       <div className="Training">
-        <div>model:</div>
-        <div>{modelEl}</div>
-        <br />
-        <div>labels:</div>
+        {this.renderScreen()}
+        {this.renderImages()}
+      </div>
+    );
+  }
+
+  renderScreen() {
+    const {isReadyToPredict, isTraining} = this.state;
+    if (!isReadyToPredict && !isTraining) return this.renderTrainButton();
+    if (!isReadyToPredict && isTraining) return this.renderWaitWhileTraining();
+    if (isReadyToPredict && !isTraining) return this.renderPredictions();
+    if (isReadyToPredict && isTraining) return <pre>there was an error!</pre>;
+  }
+
+  renderImages() {
+    const {labels} = this.props;
+    return (
+      <div style={{opacity: 0, marginTop: 400, width: '100%'}}> {/* hacking */}
         {labels.map(label => {
           const {card, rating} = label;
           return (
@@ -88,64 +100,110 @@ class Training extends Component {
             </div>
           );
         })}
-        <br />
-        
-        {!isReadyToPredict
-          ? this.renderTraining()
-          : this.renderPredictions()}
       </div>
     );
   }
 
-  renderTraining() {
-    const {isTraining} = this.state;
+  renderTrainButton() {
+    const {modelEl} = this.props;
     return (
       <div>
-        <div>training:</div>
-        {isTraining ? 'feeding the model examples and labels, adjusting the model to reduce the error, and repeating...' : <button onClick={this.onTrain}>train!</button>}
+        <div className="Global-title">{`Okay, let's train your model!`}</div>
+        <div className="Training-model-text">{modelEl}</div>
+        <TappableButton onClick={this.onTrain}>{`Start the training`}</TappableButton>
+      </div>
+    );
+  }
+
+  renderWaitWhileTraining() {
+    const {modelEl} = this.props;
+    return (
+      <div>
+        <div className="Global-title">Training {modelEl}, just gotta wait...</div>
+        <img src={waitingGif} style={{marginBottom: 20}} alt="waiting..." width="100%" />
+        <div>Training involves feeding the model the pictures you labeled, seeing how wrong it is, then adjusting the numeric weights in the model to reduce the error.</div>
         <br />
+        <div>This means multiplying and adding lots of numbers.</div>
       </div>
     );
   }
 
   renderPredictions() {
-    const {query} = this.state;
+    const {modelEl} = this.props;
+    const {predictions} = this.state;
     return (
       <div>
-        <div>predictions:</div>
-        <img
-          crossOrigin="Anonymous"
-          ref={el => this.raincoatImgEl = el}
-          width={300}
-          height={224}
-          alt="raincoat dog"
-          src={raincoatDog}
+        <img src={doneGif} style={{marginBottom: 20}} alt="done!" width="100%" />
+        <div className="Global-title">Now explore what {modelEl} thinks!</div>
+        <YourOwnSearch
+          renderImage={item => (
+            <ImageWithPrediction
+              item={item}
+              asyncPredictFn={imgEl => this.trainer.predict(imgEl)}
+              onPredictionMade={this.onPredictionMade}
+            />
+          )}
         />
-        <div>Try your model out with more images!</div>
-        <input
-          autoFocus={true}
-          onChange={this.onQueryChange}
-          type="text"
-          value={query}
-        />
-        <ImageSearch
-          apiKey="abc"
-          domain="https://services-edu.herokuapp.com"
-          query={query}
-          imageProps={{
-            width: 300,
-            height: 224
-          }}
-          asyncPredictFn={async (imgEl) => this.trainer.predict(imgEl)}
-        />
+        {predictions.length > 0 && (
+          <div>
+            <div className="Global-title">Share your {modelEl} and see how it compares to other models!</div>
+            <TappableButton onClick={this.onShare}>{`Share`}</TappableButton>
+          </div>
+        )}
       </div>
     );
   }
 }
 Training.propTypes = {
+  modelText: PropTypes.string.isRequired,
   modelEl: PropTypes.node.isRequired,
   labels: PropTypes.array.isRequired
 };
 
 
-export default Training;
+
+function ImageWithPrediction({item, asyncPredictFn, onPredictionMade}) {
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const imgRef = useRef(null);
+  const [prediction, setPrediction] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (hasLoaded && imgRef) {
+      asyncPredictFn(imgRef.current)
+        .then(p => {
+          setPrediction(p);
+          onPredictionMade({item, prediction: p});
+        })
+        .catch(setError);
+    }
+  }, [hasLoaded, imgRef]);
+
+  return (
+    <div className="ImageSearch-image" key={item.link}>
+      <img
+        ref={imgRef}
+        onLoad={() => setHasLoaded(true)}
+        crossOrigin="Anonymous"
+        src={item.image.thumbnailLink} /* can't load full images, they don't all support CORS */
+        alt={item.title}
+        width={300}
+        height={224}
+      />
+      <div className="ImageSearch-image-source">
+        <span>from </span>
+        <a className="ImageSearch-image-link" href={item.image.contextLink} target="_blank" rel="noopener noreferrer">{item.displayLink}</a>
+      </div>
+      <div>
+        <span>prediction:</span>
+        <span>{hasLoaded && imgRef && error && <pre>{JSON.stringify(error)}</pre>}</span>
+        <span>{hasLoaded && imgRef && prediction !== null ? prediction : '...'}</span>
+      </div>
+    </div>
+  );
+}
+ImageWithPrediction.propTypes = {
+  item: PropTypes.object.isRequired,
+  asyncPredictFn: PropTypes.func.isRequired,
+  onPredictionMade: PropTypes.func.isRequired
+};

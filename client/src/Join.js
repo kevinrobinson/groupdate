@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TappableButton from './components/TappableButton';
+import ProjectIngredients from './ProjectIngredients';
 import './Join.css';
 
 
@@ -41,20 +42,14 @@ class Join extends Component {
 
   render() {
     const {modelEl} = this.props;
-    const {code} = this.state;
 
     return (
       <div className="Join">
         <form className="Global-content" action="#" onSubmit={this.onSubmit}>
           <div className="Global-title">{`Here's a new model for you to train:`}</div>
           <div className="Join-model-text">{modelEl}</div>
-          <div className="Join-details">
-            <div className="Global-title">{`It's built from:`}</div>
-            <ul>
-              <li><b>embeddings</b> from a copy of the <a href="https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/README.md">MobileNet</a> model, created by Google</li>
-              <li><b>dataset</b> from <a href="http://www.image-net.org/">ImageNet</a> used to train those embeddings</li>
-              <li><b>training architecture</b> made for <a href="https://github.com/kevinrobinson/labelit">this project</a> so you can train your own model!</li>
-            </ul>
+          <div className="Join-details" style={{marginTop: 20, marginBottom: 20}}>
+            <ProjectIngredients />
           </div>
           {/*<div className="Global-title">{`What's your group code?`}</div>
           <input
